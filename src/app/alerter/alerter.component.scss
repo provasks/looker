@@ -1,0 +1,20 @@
+.alert {
+  margin-bottom: 5px;
+  width: 100%;
+  .close {
+    position: absolute;
+    top: -2px;
+    right: 3px;
+    //   color: white;
+    font-size: 13px;
+  }
+  span {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  // &.alert-success {
+  //   color: white;
+  //   background-color: #2a2ad8;
+  //   border-color: #1414e2;
+  // }
+}

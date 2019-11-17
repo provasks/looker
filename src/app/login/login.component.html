@@ -1,0 +1,71 @@
+<div class="alert-container">
+  <app-alerter></app-alerter>
+</div>
+<div class="login-comp">
+  <div class="trainz-logo">
+    <img src="../assets/trianz-logo.png" alt="trianz logo" />
+  </div>
+  <div class="col-md-3 col-xs-12 login-form-sec">
+    <h2 class="text-white fontSize-20">Sign in</h2>
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+      class="mt-4 was-validated"
+    >
+      <div class="form-group user-input">
+        <label for="username" class="text-white">Username</label>
+        <input
+          type="text"
+          formControlName="username"
+          placeholder="Enter your email."
+          class="pt-3 pl-4 bottom-border form-control text-white"
+          required
+          pattern="[a-zA-Z]+[a-zA-Z0-9._]+@[a-zA-Z]+\.[a-zA-Z.]{2,5}"
+        />
+        <!-- [ngClass]="{ 'is-invalid': submitted && f.username.errors }" -->
+        <img src="../assets/profile.png" alt="user icon" class="user-icon" />
+        <div
+          *ngIf="f.username.errors && f.username.dirty"
+          class="invalid-feedback"
+        >
+          <div *ngIf="f.username.errors.required">Username is required</div>
+          <div *ngIf="f.username.errors.email">Enter valid Username</div>
+        </div>
+      </div>
+
+      <div class="form-group password-input">
+        <label for="password" class="text-white">Password</label>
+        <input
+          type="password"
+          placeholder="Enter your password."
+          formControlName="password"
+          class="pt-3 pl-4 bottom-border form-control text-white"
+          required
+        />
+        <!-- min-length="8" -->
+        <!-- [ngClass]="{ 'is-invalid': submitted && f.password.errors }" -->
+        <img
+          src="../assets/password.png"
+          alt="password icon"
+          class="pass-icon"
+        />
+        <div
+          *ngIf="f.password.errors && f.password.dirty"
+          class="invalid-feedback"
+        >
+          <div *ngIf="f.password.errors.required">Password is required</div>
+          <!-- <div *ngIf="f.password.errors.minLength">
+            Min length Password is required
+          </div> -->
+        </div>
+      </div>
+      <div class="form-group text-center">
+        <button [disabled]="!loginForm.valid" class="orange btn">
+          <!-- <button [disabled]="!loginForm.valid" class="btn login-btn"> -->
+          Login
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

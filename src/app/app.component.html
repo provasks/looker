@@ -1,0 +1,31 @@
+<div class="container-fluid">
+  <nav
+    class="navbar navbar-expand-sm fixed-top clear-padding"
+    *ngIf="navHeader"
+  >
+    <div class="col-md-6 col-xs-12">
+      <div class="logo ustify-content-start">
+        <img src="../assets/trianz-logo.png" alt="trianz logo" />
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xs-12">
+      <div class="menu ustify-content-end">
+        <ul class="nav justify-content-start">
+          <li class="nav-item" *ngFor="let item of navItems">
+            <a [routerLink]="item.routerLink" routerLinkActive="active">
+              <img [src]="item.imageUrl" alt="{{ item.name }} icon" />
+              <p>{{ item.name }}</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+<div
+  class="container-fluid page-routing-sec clear-padding"
+  [ngClass]="navHeader ? 'mtop-40' : 'full-height'"
+>
+  <router-outlet> </router-outlet>
+</div>

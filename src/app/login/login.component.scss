@@ -1,0 +1,56 @@
+.login-comp {
+  background: url("../../assets/loginscreen.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  height: 100%;
+}
+
+.login-btn {
+  background-color: #fc6b02;
+  color: #fff;
+}
+.trainz-logo {
+  padding: 30px 160px;
+}
+.login-form-sec {
+  padding: 30px 80px;
+}
+
+.form-group label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.user-input,
+.password-input {
+  position: relative;
+  width: 210px;
+}
+
+.pass-icon,
+.user-icon {
+  position: absolute;
+  left: 0;
+  top: 21px;
+  width: 15px;
+  height: 15px;
+}
+
+.fontSize-20 {
+  font-size: 20px;
+}
+input {
+  height: 26px;
+  &.pt-3 {
+    padding-top: 0 !important;
+  }
+}
+
+.was-validated {
+  .form-control:invalid,
+  .form-control:valid {
+    border-color: white;
+    background-position: bottom 3px right;
+  }
+}

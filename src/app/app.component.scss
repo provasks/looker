@@ -1,0 +1,44 @@
+.navbar {
+  height: 103px;
+  background: #0099cc;
+  .logo {
+    width: 200px;
+    padding: 1vw;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .menu {
+    height: 103px;
+    display: flex;
+    align-items: flex-end;
+
+    li {
+      text-align: center;
+      margin-left: 4vw;
+      a {
+        color: #fff;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 18px;
+        font-weight: 600;
+        &.active {
+          border-bottom: 4px solid #fc6b02;
+        }
+      }
+    }
+  }
+}
+
+.page-routing-sec {
+  height: 100%;
+  &:not(.full-height) {
+    height: calc(100% - 120px);
+  }
+}
+
+.mtop-40 {
+  top: 120px;
+  position: relative;
+}
