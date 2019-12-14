@@ -4,31 +4,52 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AlertService } from "../services/alert.service";
 import { AuthenticationService } from "../services/authentication.service";
 import { CommonService } from "../services/common.service";
+import {
+  CognitoCallback,
+  LoggedInCallback
+} from "../authentication/cognito.service";
+import { DynamoDBService } from "../authentication/ddb.service";
+import { UserLoginService } from "../authentication/user-login.service";
+declare var $: any;
+
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.scss"]
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent
+  implements CognitoCallback, LoggedInCallback, OnInit {
   loginForm: FormGroup;
-  // loading = false;
-  // submitted = false;
+  returnUrl: any;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private alertService: AlertService,
-    private authService: AuthenticationService,
-    private commonService: CommonService
-  ) {
-    this.commonService.setHeaderVisibility(false);
+  isLoggedIn(message: string, isLoggedIn: boolean) {
+    if (isLoggedIn) {
+      this.router.navigate([this.returnUrl]);
+    }
+  }
+  cognitoCallback(message: string, result: any) {
+    if (message != null) {
+      //error
+      this.alertService.error(message);
+    } else {
+      //success
+      this.ddb.writeLogEntry("login");
+      this.router.navigate([this.returnUrl]);
+    }
   }
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
+      // username: [
+      //   "Provas.Saha@trianz.com",
+      //   [Validators.required, Validators.email]
+      // ],
+      // password: ["Cisco!56", Validators.required]
       username: ["", [Validators.required, Validators.email]],
       password: ["", Validators.required]
     });
+
+    this.returnUrl = this.commonService.getReturnUrl();
   }
 
   /**Alias for Login form control */
@@ -37,22 +58,34 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    // this.submitted = true;
-
     // stop here if form is invalid
     if (this.loginForm.invalid) {
       return;
     }
-    const status = this.authService.login(
-      this.loginForm.controls.username.value.trim(),
-      this.loginForm.controls.password.value.trim()
+
+    this.userService.authenticate(
+      this.f.username.value.trim(),
+      this.f.password.value.trim(),
+      this
     );
-    if (status) {
-      this.router.navigate(["/dashboard"]);
-      // this.cmnSer.updatedDataSelection(true);
-      // this.router.navigate([])
-    } else {
-      this.alertService.error("Login failed.");
-    }
+  }
+
+  onRegisterClick() {
+    $("#registration-modal").modal({
+      backdrop: "static",
+      keyboard: false
+    });
+  }
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private alertService: AlertService,
+    private commonService: CommonService,
+
+    public ddb: DynamoDBService,
+    public userService: UserLoginService
+  ) {
+    this.commonService.setHeaderVisibility(false);
   }
 }

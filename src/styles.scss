@@ -1,58 +1,61 @@
 @import "./app/content/scss/checkbox.scss";
-@import "./app/content/scss/mixins.scss";
+@import "./app/content/scss/button.scss";
+
 /* You can add global styles to this file, and also import other style files */
 * {
   margin: 0;
   padding: 0;
 }
+
 body {
   margin: 0;
   padding: 0;
   height: 100vh;
 }
 
+.shift-container {
+  padding: 20px 40px;
+  .card {
+    border: 1px solid #666;
+    padding: 30px 20px;
+    background: #f5f5f5;
+    border-radius: 5px;
+    min-height: 170px;
+    overflow: hidden;
+  }
+}
 .alert-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  position: fixed;
+  top: 48vh;
+  left: 48vw;
   width: 200px;
-  transform: translate(-50%, -50%);
-  z-index: 10;
+  // transform: translate(-50%, -50%);
+  z-index: 9999;
 }
 
 .bottom-border {
   border: none;
-  border-bottom: 1px solid #fff;
+  border-bottom: 1px solid $white;
   border-radius: inherit;
   background-color: transparent;
-}
-
-.bottom-border:focus {
-  background-color: transparent !important;
-  /* background-color: #fff; */
-  border-color: #fff !important;
-  outline: none !important;
-  box-shadow: inherit !important;
-}
-
-.form-group label {
-  /*color: #fff;*/
+  &:focus {
+    background-color: transparent !important;
+    /* background-color: #fff; */
+    border-color: $white !important;
+    outline: none !important;
+    box-shadow: inherit !important;
+  }
 }
 
 .text-white {
-  color: #fff;
+  color: $white;
 }
 .clear-padding {
   padding: 0 !important;
 }
 
-.orange-btn {
-  background-color: #fc6b02;
-  color: #fff;
-  padding: 10px 45px;
-}
 .text-danger {
-  color: #f00;
+  color: $red;
 }
 
 .pull-left {
@@ -74,3 +77,62 @@ label {
     content: "*";
   }
 }
+
+.form-group {
+  label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .info {
+    font-size: 12px;
+    padding-left: 5px;
+  }
+}
+.was-validated {
+  select {
+    &.form-control {
+      &:valid,
+      &:invalid {
+        background-image: none;
+      }
+    }
+  }
+}
+
+.disabled,
+button:disabled {
+  cursor: no-drop;
+}
+// .modal-content {
+//   background-color: $modal-background;
+//   .modal-header {
+//     .modal-title {
+//       color: $white;
+//     }
+//     button {
+//     }
+//   }
+
+//   .modal-body {
+//     .form-group {
+//       label {
+//         margin: 0;
+//         font-size: 12px;
+//         font-weight: 600;
+//         color: $white;
+//       }
+//       input {
+//         height: 26px;
+//         border: none;
+//         border-bottom: 1px solid #ffffff;
+//         border-radius: inherit;
+//         background-color: transparent;
+//         color: $white;
+//         &:focus {
+//           outline: none;
+//         }
+//       }
+//     }
+//   }
+// }

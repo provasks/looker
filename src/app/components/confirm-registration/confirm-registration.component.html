@@ -1,0 +1,77 @@
+<div class="alert-container">
+  <app-alerter></app-alerter>
+</div>
+<div class="shift-container">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="col-md-12 pb-4">
+        <form
+          #frmConfirm="ngForm"
+          class="form-signin was-validated"
+          method="POST"
+          action="#"
+          role="form"
+        >
+          <div class="form-group">
+            <h2>Confirm Registration</h2>
+          </div>
+          <div *ngIf="errorMessage != null" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+          <div class="form-group" *ngIf="email === null">
+            <label class="control-label" for="confirmationCode">Email</label>
+            <input
+              id="email"
+              type="email"
+              maxlength="50"
+              class="form-control"
+              [(ngModel)]="email"
+              [ngModelOptions]="{ standalone: true }"
+            />
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="confirmationCode"
+              >Confirmation Code</label
+            >
+
+            <input
+              name="confirmationCode"
+              type="text"
+              maxlength="50"
+              class="form-control"
+              [(ngModel)]="confirmationCode"
+              #name="ngModel"
+              pattern="\b\d{6}\b"
+              required
+              novalidate
+            />
+          </div>
+          <div class="form-group">
+            <button
+              (click)="onConfirmRegistration()"
+              id="confirmRegistration"
+              type="submit"
+              class="btn orange"
+              [disabled]="!frmConfirm.valid"
+            >
+              Confirm
+            </button>
+          </div>
+          <hr />
+          <p>
+            Can't find your code?
+            <a [routerLink]="['/resend-code']">
+              <i class="fa fa-fw fa-group"></i> Resend Code</a
+            >
+            <!-- <a [routerLink]="['/home/register']">
+              <i class="fa fa-fw fa-group"></i> Register</a
+            >
+            <a [routerLink]="['/home/login']">
+              <i class="fa fa-fw fa-user"></i> Login</a
+            > -->
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="alert-container">
+  <app-alerter></app-alerter>
+</div>
+<div class="shift-container">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="col-md-12 pb-4">
+        <form
+          #frmResend="ngForm"
+          class="form-signin was-validated"
+          method="POST"
+          action="#"
+          role="form"
+        >
+          <div class="form-group">
+            <h2>Resend Code</h2>
+          </div>
+          <div *ngIf="errorMessage != null" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="signupEmail">Email</label>
+            <input
+              type="text"
+              name="email"
+              class="form-control"
+              [(ngModel)]="user.email"
+              #email="ngModel"
+              placeholder="yourname@domain.com"
+              required
+              pattern="[a-zA-Z]+[a-zA-Z0-9._]+@[a-zA-Z]+\.[a-zA-Z.]{2,5}"
+              novalidate
+            />
+          </div>
+          <div class="form-group">
+            <button
+              (click)="resendCode()"
+              id="signupSubmit"
+              type="submit"
+              class="btn orange"
+              [disabled]="!frmResend.valid"
+            >
+              Resend Code
+            </button>
+          </div>
+
+          <hr />
+          <p>
+            <!-- <a [routerLink]="['/home/register']">
+              <i class="fa fa-fw fa-group"></i> Register</a
+            > -->
+            <a [routerLink]="['/login']">
+              <i class="fa fa-fw fa-user"></i> Login</a
+            >
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

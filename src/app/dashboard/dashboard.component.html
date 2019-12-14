@@ -1,14 +1,18 @@
 <div class="alert-container">
   <app-alerter></app-alerter>
 </div>
-<div class="dashboard-container">
+<div class="shift-container">
   <div class="col-md-12">
     <div class="select-platform">
       <div class="col-md-12 pb-4">
         <h5>Select Platform</h5>
       </div>
       <div class="platform-sec-container">
-        <form [formGroup]="frmPlatform" class="was-validated">
+        <form
+          [formGroup]="frmPlatform"
+          class="was-validated"
+          enctype="multipart/form-data"
+        >
           <div class="col-md-9 pull-left">
             <div class="form-group dropdown">
               <select
@@ -27,16 +31,14 @@
               </select>
             </div>
 
-            <div *ngIf="selectedPlatform ">
+            <div *ngIf="selectedPlatform?.value">
               <div
                 class="form-group"
                 *ngIf="
                   selectedPlatform.value == 'Business Object Server Universe'
                 "
               >
-                <label class="required"
-                  >Enter the URL of {{ selectedPlatform.value }}
-                </label>
+                <label class="required">Enter the URL</label>
                 <input
                   type="text"
                   formControlName="platformProperty"
@@ -50,8 +52,19 @@
                   selectedPlatform.value != 'Business Object Server Universe'
                 "
               >
-                <label class="required">
-                  {{ selectedPlatform.value }} (Select a file)
+                <label
+                  class="required"
+                  *ngIf="
+                    selectedPlatform.value === 'Upload QlickView Workbooks'
+                  "
+                >
+                  Select a .qvd file
+                </label>
+                <label
+                  class="required"
+                  *ngIf="selectedPlatform.value === 'Business Object Server'"
+                >
+                  Select a .unx file
                 </label>
 
                 <input
@@ -59,6 +72,7 @@
                   formControlName="platformProperty"
                   class="form-control"
                   required
+                  (change)="handleFileInput($event.target.files)"
                 />
               </div>
             </div>
@@ -66,6 +80,20 @@
 
           <div class="col-md-3 pull-left">
             <button
+              *ngIf="
+                selectedPlatform.value != 'Business Object Server Universe'
+              "
+              type="button"
+              class="orange btn"
+              [disabled]="!isPlatformValid"
+              (click)="submitPlatform()"
+            >
+              Submit
+            </button>
+            <button
+              *ngIf="
+                selectedPlatform.value == 'Business Object Server Universe'
+              "
               type="button"
               class="orange btn"
               data-toggle="modal"
@@ -95,15 +123,7 @@
                   <span class="universe-name-acc">
                     {{ platformSelected.value }}
                   </span>
-                  <!-- <button
-                    type="button"
-                    data-toggle="modal"
-                    data-target="#platformForm"
-                    class="orange btn pl-3 pr-3 pb-1 pt-1"
-                    *ngIf="isMultipleSelected"
-                  >
-                    Convert <span style="font-size:18px;">&#8593;</span>
-                  </button> -->
+
                   <span class="arrow-icon"> </span>
                 </a>
               </div>
@@ -113,45 +133,42 @@
                 data-parent="#accordion"
               >
                 <div class="card-body clear-padding">
-                  <!-- <div class="convert-btn">
-                    <button
-                      type="button"
-                      data-toggle="modal"
-                      data-target="#platformForm"
-                      class="orange btn pull-right mt-2 mb-2 mr-3 pl-3 pr-3 pb-1 pt-1"
-                      *ngIf="isMultipleSelected"
-                    >
-                      Convert <span style="font-size:18px;">&#8593;</span>
-                    </button>
-                  </div> -->
                   <table class="table ">
                     <thead>
                       <tr>
                         <th class="actions">
-                          <div title="Select all Universe">
+                          <div>
                             <input
                               type="checkbox"
                               id="check-all"
+                              title="Select all Universe"
                               class="regular-checkbox"
                               (change)="checkAll($event)"
+                              [(ngModel)]="isMultipleUniverseSelected"
                             /><label for="check-all"></label>
-                          </div>
-                          <div
-                            data-toggle="modal"
-                            data-target="#platformForm"
-                            *ngIf="isMultipleSelected"
-                          >
-                            <img
-                              src="../assets/convert_25.png"
-                              alt="Convert selected"
-                              title="Convert selected"
-                            />
                           </div>
                         </th>
                         <th>Universe name</th>
                         <th>Universe Folder</th>
-                        <th style="display:none">Action</th>
+
                         <th>Status</th>
+                        <th>
+                          <div class="convert">
+                            <img
+                              src="../assets/convert_25.png"
+                              alt="Convert all selected"
+                              title="Convert all selected"
+                              data-toggle="modal"
+                              data-target="#frmPlatform"
+                              *ngIf="isMultipleUniverseSelected"
+                            />
+                            <img
+                              *ngIf="!isMultipleUniverseSelected"
+                              src="../assets/convert_25.png"
+                              class="disabled"
+                            />
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -172,32 +189,31 @@
                               (change)="setMulipleCheckStatus()"
                             /><label [for]="i"></label>
                           </div>
-                          <div>
+                        </td>
+                        <td>{{ universe.universeName }}</td>
+                        <td>{{ universe.folderPath }}</td>
+                        <td>
+                          <span>
+                            {{ universe.status }}
+                          </span>
+                        </td>
+                        <td>
+                          <div class="convert">
                             <img
+                              *ngIf="universe.selected"
                               src="../assets/convert_25.png"
                               alt="Convert"
                               title="Convert"
                               data-toggle="modal"
-                              data-target="#platformForm"
+                              data-target="#frmPlatform"
+                              (click)="onConvertClick(universe)"
+                            />
+                            <img
+                              *ngIf="!universe.selected"
+                              src="../assets/convert_25.png"
+                              class="disabled"
                             />
                           </div>
-                        </td>
-                        <td>{{ universe.universeName }}</td>
-                        <td>{{ universe.folderPath }}</td>
-                        <td style="display: none;">
-                          <button
-                            type="button"
-                            data-toggle="modal"
-                            data-target="#platformForm"
-                            class="orange btn pl-3 pr-3 pb-1 pt-1"
-                          >
-                            Convert <span style="font-size:18px;">&#8593;</span>
-                          </button>
-                        </td>
-                        <td>
-                          <span style="color: green">
-                            {{ universe.status }}
-                          </span>
                         </td>
                       </tr>
                     </tbody>
@@ -254,12 +270,12 @@
   </div>
 </div>
 
-<div class="modal" id="platformForm">
+<div class="modal" id="frmPlatform">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <!-- Modal Header -->
       <div class="modal-header">
-        <h5 class="modal-title">{{ platformSelected.value }}</h5>
+        <h5 class="modal-title">{{ platformSelected?.value }}</h5>
         <button type="button" class="close" data-dismiss="modal">
           &times;
         </button>
@@ -268,11 +284,7 @@
       <!-- Modal body -->
       <div class="modal-body">
         <div class="col-md-12">
-          <form
-            [formGroup]="frmUniverse"
-            (ngSubmit)="onSubmitUniverse()"
-            class="mt-4 was-validated"
-          >
+          <form [formGroup]="frmUniverse" class="mt-4 was-validated">
             <!-- choosing the upload type  -->
             <div class="select-values">
               <div class="select-values row custom-radio" style="display: none">
@@ -324,6 +336,8 @@
                         type="checkbox"
                         id="chkLookML"
                         class="regular-checkbox"
+                        [(ngModel)]="chkLookML"
+                        [ngModelOptions]="{ standalone: true }"
                       /><label for="chkLookML"></label>
                       <div>Migrate to LookML</div>
                     </div>
@@ -334,57 +348,53 @@
                         type="checkbox"
                         id="chkConvert"
                         class="regular-checkbox"
-                        (change)="enabledropdownsSnowfalke($event)"
-                        formControlName="snowflakeSyntax"
+                        [(ngModel)]="chkConvert"
+                        [ngModelOptions]="{ standalone: true }"
                       /><label for="chkConvert"></label>
                       <div>Convert to a new Database Syntax</div>
                     </div>
                   </div>
 
                   <!-- snowflex dropdowns -->
-                  <div class="col-md-12 mb-2" *ngIf="enableSnowflexDropdowns">
+                  <div class="col-md-12 mb-2" *ngIf="chkConvert">
                     <div class="row">
                       <div class="col-lg-6 col-md-12 col-sm-12">
                         <div class="form-group">
-                          <label for="SourceDatabaseSyntaxID"
+                          <label for="selectedSourceDatabase"
                             >Choose Source Database Syntax</label
                           >
                           <select
                             class="form-control"
-                            id="SourceDatabaseSyntaxID"
-                            formControlName="SourceDatabaseSyntaxName"
+                            id="selectedSourceDatabase"
+                            [(ngModel)]="selectedSourceDatabase"
+                            [ngModelOptions]="{ standalone: true }"
                           >
-                            <option class="option-universe" [ngValue]="">
-                              Select
+                            <option
+                              *ngFor="let db of sourceDatabaseList"
+                              [ngValue]="db"
+                            >
+                              {{ db }}
                             </option>
-                            <option [ngValue]="Snowflake"> Snowflake </option>
-                            <option [ngValue]="Teradata"> Teradata </option>
-                            <option [ngValue]="Oracle"> Oracle </option>
-                            <option [ngValue]="Redshift"> Redshift </option>
-                            <option [ngValue]="MSSQL"> MSSQL</option>
-                            <option [ngValue]="Netezza"> Netezza </option>
                           </select>
                         </div>
                       </div>
                       <div class="col-lg-6 col-md-12 col-sm-12">
                         <div class="form-group">
-                          <label for="DestinationSyntaxId"
+                          <label for="selectedDestinationDatabase"
                             >Choose Destination Syntax</label
                           >
                           <select
                             class="form-control"
-                            id="DestinationSyntaxId"
-                            formControlName="DestinationSyntaxName"
+                            id="selectedDestinationDatabase"
+                            [(ngModel)]="selectedDestinationDatabase"
+                            [ngModelOptions]="{ standalone: true }"
                           >
-                            <option class="option-universe" [ngValue]="">
-                              Select
+                            <option
+                              *ngFor="let db of destinationDatabaseList"
+                              [ngValue]="db"
+                            >
+                              {{ db }}
                             </option>
-                            <option [ngValue]="Snowflake"> Snowflake </option>
-                            <option [ngValue]="Teradata"> Teradata </option>
-                            <option [ngValue]="Oracle"> Oracle </option>
-                            <option [ngValue]="Redshift"> Redshift </option>
-                            <option [ngValue]="MSSQL"> MSSQL</option>
-                            <option [ngValue]="Netezza"> Netezza </option>
                           </select>
                         </div>
                       </div>
@@ -393,6 +403,7 @@
                 </div>
               </div>
 
+              <!-- Start - Business object popup  -->
               <div class="server-address-sec mt-4" style="display:none">
                 <h5 class="clr-blue mb-0">Business Objects Universe</h5>
                 <div class="form-group user-input">
@@ -404,7 +415,6 @@
                     type="text"
                     formControlName="serverAddressName"
                     class="form-control"
-                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
                   />
                 </div>
 
@@ -417,7 +427,6 @@
                     type="text"
                     formControlName="adminUserNameName"
                     class="form-control"
-                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
                   />
                 </div>
 
@@ -430,10 +439,10 @@
                     type="password"
                     formControlName="adminPassword"
                     class="form-control"
-                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
                   />
                 </div>
               </div>
+              <!-- End - Business Object Popup -->
 
               <!-- radio button selection Universes through REST API show here -->
               <div
@@ -451,17 +460,12 @@
                     <input
                       id="uploadUniverses"
                       tabindex="0"
-                      accept=".csv"
                       name="uploadUniverses"
-                      (change)="uploadFile($event)"
                       type="file"
                       formControlName="uploadUniversesName"
                       class="form-control"
-                      [ngClass]="{
-                        'is-invalid': submitted && f.username.errors
-                      }"
                     />
-                    <!--<span> {{fileName}} </span>-->
+
                     <img
                       src="../assets/upload.png"
                       alt="upload file icon"
@@ -469,10 +473,6 @@
                     />
                     <p>{{ fileName }}</p>
                   </label>
-                  <!--<div *ngIf="frmUniverse.uploadUniversesName.errors">
-                      <div *ngIf="f.password.errors.required">Password is required</div>
-                      <div *ngIf="f.password.errors.type">Min length Password is required</div>
-                  </div>     -->
                 </div>
 
                 <div class="form-group user-input">
@@ -482,7 +482,6 @@
                     type="text"
                     formControlName="repoWebsiteName"
                     class="form-control"
-                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
                   />
                 </div>
 
@@ -493,7 +492,6 @@
                     type="text"
                     formControlName="githubTokenName"
                     class="form-control"
-                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }"
                   />
                 </div>
               </div>
@@ -510,11 +508,18 @@
             >
               CONTINUE
             </button>
-            <!--<button type="button" class="orange btn pull-right" (click)="universesSubmit()" *ngIf="univereSubmitEnable">SUBMIT</button>            -->
+
             <button
               type="button"
               class="orange btn pull-right"
-              (click)="universesSubmit()"
+              (click)="submitUniverseList()"
+              [disabled]="
+                !(
+                  chkLookML ||
+                  (chkConvert &&
+                    selectedSourceDatabase !== selectedDestinationDatabase)
+                )
+              "
             >
               SUBMIT
             </button>
@@ -536,11 +541,7 @@
       <!-- Modal body -->
       <div class="modal-body">
         <div class="col-md-12">
-          <form
-            [formGroup]="frmBusinessObject"
-            (ngSubmit)="onSubmitSapBusinessObjForm()"
-            class="was-validated"
-          >
+          <form [formGroup]="frmBusinessObject" class="was-validated">
             <div class="form-SAPBusinessObj">
               <div class="server-address-sec">
                 <h2 class="clr-blue">SAP Business Objects</h2>
@@ -561,9 +562,6 @@
                       type="text"
                       formControlName="system"
                       class="form-control"
-                      [ngClass]="{
-                        'is-invalid': submitted && f.username.errors
-                      }"
                       required
                     />
                   </div>
@@ -575,9 +573,6 @@
                       type="text"
                       formControlName="userName"
                       class="form-control"
-                      [ngClass]="{
-                        'is-invalid': submitted && f.username.errors
-                      }"
                       required
                     />
                   </div>
@@ -589,17 +584,11 @@
                       type="password"
                       formControlName="password"
                       class="form-control"
-                      [ngClass]="{
-                        'is-invalid': submitted && f.username.errors
-                      }"
                       required
                     />
                   </div>
 
-                  <div class="passwordAuth mb-3">
-                    <!-- <span class="text-danger"> Validation failed 
-                      </span> -->
-                  </div>
+                  <div class="passwordAuth mb-3"></div>
 
                   <div class="form-group">
                     <label for="businessObjAuthentication"
@@ -609,7 +598,7 @@
                       class="form-control"
                       id="businessObjAuthentication"
                       formControlName="authenticationType"
-                      (change)="onAuthChange($event.target.value)"
+                      (change)="onAuthChange($event.target?.value)"
                       required
                     >
                       <option

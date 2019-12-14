@@ -1,20 +1,18 @@
 import { Injectable } from "@angular/core";
 import { Observable, Subject } from "rxjs";
+import { Config } from "../content/config";
+import { Universe } from "../models/universe.model";
 
 @Injectable({
   providedIn: "root"
 })
 export class DashboardService {
+  selectedUniverses: Universe[] = [];
   getAuthTypes(): string[] {
-    return ["secEnterPrise", "Window Ad2", "Windows Ad3"];
+    return Config["authenticationTypes"];
   }
-  constructor() {}
   getPlatforms(): string[] {
-    return [
-      "Business Object Server Universe",
-      "Upload QlickView Workbooks",
-      "Business Object Server"
-    ];
+    return Config["platforms"];
   }
 
   platform$ = new Subject<any>();

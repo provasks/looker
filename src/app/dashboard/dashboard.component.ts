@@ -11,20 +11,16 @@ import { AuthenticationService } from "../services/authentication.service";
 import { BoServer } from "../models/bo-server.model";
 import { CommonService } from "../services/common.service";
 import { Universe } from "../models/universe.model";
+import { Config } from "../content/config";
+import { ApiService } from "../services/api.service";
 declare var $: any;
+
 @Component({
   selector: "app-dashboard",
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"]
 })
 export class DashboardComponent implements OnInit {
-  authTypes: string[];
-  universeList: Universe[];
-  platformSelected: AbstractControl;
-  isMultipleSelected: boolean;
-  pager: any = {};
-  paginatedUniverses: Universe[];
-
   /**Properties */
   get selectedPlatform() {
     return this.frmPlatform.get("selectedPlatform");
@@ -33,16 +29,37 @@ export class DashboardComponent implements OnInit {
     return this.frmPlatform.get("platformProperty");
   }
 
+  get f() {
+    return this.frmUniverse.controls;
+  }
+
+  /** public variables */
+  authTypes: string[];
+  universeList: Universe[];
+  platformSelected: AbstractControl;
+  isMultipleUniverseSelected: boolean;
+  pager: any = {};
+  paginatedUniverses: Universe[];
+  // modalData: { title: string; body: string };
+
+  sourceDatabaseList: any[];
+  destinationDatabaseList: any[];
+  selectedSourceDatabase: string;
+  selectedDestinationDatabase: string;
+  chkLookML: boolean;
+  chkConvert: boolean;
+  fileToUpload: File;
+  isPlatformValid: boolean;
+
+  frmUniverse: FormGroup;
+  frmBusinessObject: FormGroup;
+  frmPlatform: FormGroup;
+
   continueVal = 0;
   uploadSec = false;
   noContinue = true;
   univereSubmitEnable = false;
-  myFile = null;
-  csvfileError = false;
   uploadFileType = "";
-  frmUniverse: FormGroup;
-  frmBusinessObject: FormGroup;
-  frmPlatform: FormGroup;
   UploadfromBusinessUniverse = true;
   uploadIndividual = false;
   universesAccordian = false;
@@ -57,13 +74,31 @@ export class DashboardComponent implements OnInit {
     private authService: AuthenticationService,
     private formBuilder: FormBuilder,
     private alertService: AlertService,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private apiService: ApiService
   ) {
     this.commonService.setHeaderVisibility(true);
 
     this.dashboardService.getPlatform().subscribe(value => {
       this.platformSelected = value;
     });
+    this.sourceDatabaseList = [...Config["databases"]];
+    this.destinationDatabaseList = [...Config["databases"]];
+    this.selectedSourceDatabase = Config["selectedSourceDatabase"];
+    this.selectedDestinationDatabase = Config["selectedDestinationDatabase"];
+    this.chkLookML = false;
+    this.chkConvert = false;
+  }
+
+  /**Angular Life cycle Hook */
+  ngOnInit() {
+    this.setValidators();
+    this.frmPlatform.setValue({
+      platformProperty: "",
+      selectedPlatform: ""
+    });
+    this.platforms = this.dashboardService.getPlatforms();
+    this.authTypes = this.dashboardService.getAuthTypes();
   }
 
   /***************************************************************
@@ -76,6 +111,10 @@ export class DashboardComponent implements OnInit {
     this.pager.pages = [...Array(this.pager.count).keys()].map(i => i + 1);
   }
 
+  /**********************************************************************
+   * This method is responsible to set the pagintion information
+   * after swithing the apge
+   **********************************************************************/
   switchPage(currentPage: number) {
     this.pager.current = currentPage;
     const startIndex = this.pager.size * (this.pager.current - 1);
@@ -85,27 +124,26 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  /**************************************************************************
+   * This method is responsible to updated the selected properties
+   * of the Universe and also check the all the checkbox
+   *************************************************************************/
   checkAll(ev) {
     this.universeList.forEach(x => (x.selected = ev.target.checked));
     this.setMulipleCheckStatus();
   }
 
   setMulipleCheckStatus() {
-    this.isMultipleSelected =
+    this.isMultipleUniverseSelected =
       this.universeList.filter(u => u.selected).length > 1;
   }
 
-  ngOnInit() {
-    this.setValidators();
-    this.platforms = this.dashboardService.getPlatforms();
-    this.authTypes = this.dashboardService.getAuthTypes();
-  }
   setValidators() {
     this.frmBusinessObject = this.formBuilder.group({
       system: ["WIN-FN2S7NQNABE:6400", [Validators.required]],
       userName: ["Administrator", [Validators.required]],
       password: ["Passw0rd", Validators.required],
-      authenticationType: ["secEnterPrise", Validators.required]
+      authenticationType: ["secEnterprise", Validators.required]
     });
 
     this.frmUniverse = this.formBuilder.group({
@@ -117,18 +155,13 @@ export class DashboardComponent implements OnInit {
       repoWebsiteName: ["", [Validators.required]],
       githubTokenName: ["", [Validators.required]],
       lookMlOption: ["", [Validators.required]],
-      snowflakeSyntax: ["", [Validators.required]],
-      SourceDatabaseSyntaxName: ["", [Validators.required]],
-      DestinationSyntaxName: ["", [Validators.required]]
+      snowflakeSyntax: ["", [Validators.required]]
     });
 
     this.frmPlatform = this.formBuilder.group({
-      // selectedUniverse: ["", [Validators.required]],
       selectedPlatform: ["", [Validators.required]],
       platformProperty: ["", [Validators.required]]
     });
-
-    // console.log(this.frmPlatform.valid);
   }
 
   selectForm(event) {
@@ -145,13 +178,10 @@ export class DashboardComponent implements OnInit {
 
   continueForm() {
     this.continueVal = this.continueVal + 1;
-    // alert('continue : ' + this.continueVal);
     if (this.continueVal == 1) {
-      // alert('true');
       this.uploadSec = true;
       this.noContinue = false;
       this.univereSubmitEnable = true;
-      // alert('upload sec: ' + this.uploadSec);
     }
   }
 
@@ -160,67 +190,47 @@ export class DashboardComponent implements OnInit {
       platformProperty: "",
       selectedPlatform: value
     });
+    this.isPlatformValid = false;
   }
+  handleFileInput(files?: FileList) {
+    this.fileToUpload = files.item(0);
 
-  enabledropdownsSnowfalke(event) {
-    this.enableSnowflexDropdowns = event.target.checked;
+    this.isPlatformValid = this.ValidatePlatform(this.fileToUpload.name);
   }
-
-  selectUniverse() {
-    this.showContinue();
-  }
-
-  showContinue() {
-    this.continueVal = 0;
-    this.uploadSec = false;
-    this.noContinue = true;
-  }
-
-  universesSubmit() {
-    alert("universes submit");
-    // console.log(this.frmUniverse.value)
-    $("#platformForm").modal("hide");
-    // console.log(this.frmUniverse.value);
-  }
-
-  ValidFileFormat(control: AbstractControl) {
-    if (this.uploadFileType != "") {
-      if (this.uploadFileType == "csv") {
-        return { validUrl: true };
+  submitPlatform() {
+    this.apiService.postFiles(this.fileToUpload).subscribe(
+      resp => {
+        if (resp.partialText) {
+          const response = JSON.parse(resp.partialText);
+          const list: Universe[] = [
+            {
+              universeName: response.fileName,
+              folderPath: response.folderPath,
+              status: response.status
+            }
+          ];
+          this.showUniverseList(list);
+          console.log(response);
+          this.alertService.success(response.message);
+        }
+      },
+      error => {
+        this.alertService.error(JSON.parse(error.partialText)["message"]);
+        console.log(error);
       }
-      return null;
-    }
+    );
   }
 
-  uploadFile(fileEvent) {
-    // console.log(this.frmUniverse.controls.uploadUniversesName.name )
-    alert("file upload");
-
-    const file = fileEvent.target.files[0];
-    console.log("fileName" + file.name);
-    console.log("size", file.size);
-    console.log("type", file.type);
-    this.uploadFileType = file.type;
-
-    if (file.type == "application/vnd.ms-excel") {
-      var formData = new FormData();
-      formData.append("file", file);
-      // console.log(formData);
-      this.myFile = formData;
-      this.fileName = file.name;
-      console.log(this.myFile);
+  ValidatePlatform(file) {
+    const extension = this.fileToUpload.name.split(".").pop();
+    if (this.selectedPlatform.value === "Upload QlickView Workbooks") {
+      return extension === "qvd";
     } else {
-      this.csvfileError = true;
-      console.log(fileEvent);
-      fileEvent.target.value = "";
-      this.fileName = "no file choose";
+      return extension === "unx";
     }
   }
 
   SapBusinessLogin() {
-    // if (this.frmBusinessObject.invalid) {
-    //   return;
-    // }
     const boServer: BoServer = {
       system: this.frmBusinessObject.controls["system"].value,
       userName: this.frmBusinessObject.controls["userName"].value,
@@ -228,25 +238,71 @@ export class DashboardComponent implements OnInit {
       authenticationType: this.frmBusinessObject.controls["authenticationType"]
         .value
     };
+    $("#UniverseAuthentication").modal("hide");
     this.authService.BoServerLogin(boServer).subscribe(
       response => {
-        this.universeList = response;
-        this.universeList.forEach(u => {
-          u["status"] = "In Progress";
-          u["selected"] = false;
-        });
-        this.setPageInfo();
-        this.switchPage(1);
-        this.dashboardService.setPlatform(this.selectedPlatform);
-        this.universesAccordian = true;
-        $("#UniverseAuthentication").modal("hide");
-        this.alertService.info("BO server Login successful.");
+        if (response !== null) {
+          this.showUniverseList(response);
+          this.alertService.success("BO server Login successful.");
+        } else {
+          this.alertService.error("Authentication Failed.");
+        }
       },
-      error => this.alertService.error("BO Server login failed!")
+      error =>
+        this.alertService.error(
+          `${error.error.error} - <br/>Check if the server is up`
+        )
     );
+  }
+  showUniverseList(list: Universe[]) {
+    this.universeList = list;
+    this.universeList.forEach(u => {
+      u["selected"] = false;
+    });
+    this.setPageInfo();
+    this.switchPage(1);
+    this.dashboardService.setPlatform(this.selectedPlatform);
+    this.universesAccordian = true;
   }
 
   onAuthChange(value) {
     console.log(value);
+  }
+
+  onConvertClick(universe: Universe) {
+    this.dashboardService.selectedUniverses.length = 0;
+    this.dashboardService.selectedUniverses.push(universe);
+  }
+  onGlobalConvertClick() {
+    this.dashboardService.selectedUniverses = this.universeList.filter(
+      u => u.selected
+    );
+  }
+  submitUniverseList() {
+    if (!this.dashboardService.selectedUniverses) return;
+    const universeList: { universeName: string; folderPath: string }[] = [];
+    this.dashboardService.selectedUniverses.forEach(universe =>
+      universeList.push({
+        universeName: universe.universeName,
+        folderPath: universe.folderPath
+      })
+    );
+
+    const request: any = {
+      universes: universeList,
+      platform: this.selectedPlatform.value
+    };
+    this.apiService.submitUniverses(request).subscribe(
+      resp => {
+        $("#frmPlatform").modal("hide");
+        console.log(resp);
+        this.alertService.success(resp.message);
+      },
+      error => {
+        $("#frmPlatform").modal("hide");
+        console.log(error);
+        this.alertService.error(error.message);
+      }
+    );
   }
 }

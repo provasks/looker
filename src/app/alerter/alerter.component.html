@@ -1,11 +1,16 @@
 <div
   *ngFor="let alert of alerts; let i = index"
-  [class]="getAlertClass(alert)"
+  [class]="alert.background"
   role="alert"
   id="alert_{{ i }}"
 >
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-  <span>{{ alert.message }}</span>
+  <div class="alert-header {{ alert.color }}">
+    <i [class]="alert.icon"></i>
+    <div class="title">{{ alert.type.toString() }}</div>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <span [innerHTML]="alert.message"></span>
 </div>

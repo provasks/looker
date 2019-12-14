@@ -1,0 +1,52 @@
+@import "./variables.scss";
+
+@mixin alert-theme($alert-color) {
+  background-color: $alert-color;
+  margin-bottom: 5px;
+  width: 100%;
+  .alert-header {
+    display: flex;
+    i {
+      font-size: 23px;
+      flex: 0 0 30px;
+    }
+    .title {
+      font-weight: bold;
+    }
+    .close {
+      position: absolute;
+      top: -2px;
+      right: 3px;
+      font-size: 13px;
+    }
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: bold;
+  }
+}
+
+@mixin trans($val...) {
+  -webkit-transition: $val;
+  -moz-transition: $val;
+  -o-transition: $val;
+  transition: $val;
+}
+
+.alert {
+  @include trans(0.2s ease-in-out);
+}
+
+.danger {
+  @include alert-theme($purple);
+}
+.info {
+  @include alert-theme($blue);
+}
+.success {
+  @include alert-theme($green);
+}
+.warning {
+  @include alert-theme($orange);
+}

@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonService } from "./services/common.service";
+import { IdleTimerService } from "./services/idle-timer.service";
 
 @Component({
   selector: "app-root",
@@ -8,9 +9,12 @@ import { CommonService } from "./services/common.service";
 })
 export class AppComponent implements OnInit {
   title = "looker";
-  navHeader: boolean;
+  navHeader: boolean = true;
   navItems: any[];
-  constructor(private commonService: CommonService) {
+  constructor(
+    private commonService: CommonService,
+    private idleTimer: IdleTimerService
+  ) {
     // setTimeout( () => {this.navHeader = this.cmnSer.navHeader;}, 1000 )
   }
 

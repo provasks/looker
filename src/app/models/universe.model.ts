@@ -1,7 +1,7 @@
 export class Universe {
-  "cuid": string;
+  "cuid"?: string;
   "universeName": string;
   "folderPath": string;
   "status": string;
-  "selected": boolean;
+  "selected"?: boolean;
 }

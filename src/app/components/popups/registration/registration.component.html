@@ -1,0 +1,94 @@
+<div id="registration-modal" class="modal fade" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registration</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form #myForm="ngForm" class="was-validated">
+          <div class="form-group">
+            <label for="name" class="col-form-label required">Name</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control"
+              [(ngModel)]="user.name"
+              #name="ngModel"
+              placeholder="Enter your name"
+              required
+              novalidate
+            />
+          </div>
+          <div class="form-group">
+            <label for="phone" class="col-form-label required">Phone</label>
+            <input
+              type="text"
+              name="phone"
+              class="form-control"
+              [(ngModel)]="user.phone_number"
+              #name="ngModel"
+              placeholder="Enter your phone"
+              required
+              pattern="([0|\+[0-9]{1,5})?([0-9]{10})"
+              novalidate
+            />
+          </div>
+          <div class="form-group">
+            <label for="email" class="col-form-label required">Email</label>
+            <input
+              type="text"
+              name="email"
+              class="form-control"
+              [(ngModel)]="user.email"
+              #email="ngModel"
+              placeholder="yourname@domain.com"
+              required
+              pattern="[a-zA-Z]+[a-zA-Z0-9._]+@[a-zA-Z]+\.[a-zA-Z.]{2,5}"
+              novalidate
+            />
+            <!-- <pre>{{ myForm.value | json }} {{ myForm.valid }}</pre> -->
+          </div>
+          <div class="form-group">
+            <div style="display:flex">
+              <label for="password" class="col-form-label required"
+                >Password</label
+              ><i
+                class="col-form-label fa fa-info-circle info"
+                title="Password must be at least one uppercase letter, one lowercase letter, one number and one special charecter [e.g. ~!@#$%^&*()]"
+              ></i>
+            </div>
+            <input
+              type="password"
+              name="password"
+              class="form-control"
+              [(ngModel)]="user.password"
+              #name="ngModel"
+              placeholder="Enter your password"
+              required
+              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,}"
+              novalidate
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="orange btn"
+          [disabled]="!myForm.valid"
+          (click)="onRegister()"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
